@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How to Grovel (The Right Way) • H-W Resource</title>
+    <style media="screen">
+      :root {
+        --sky: #8faec0;
+        --deep-sky: #698da5;
+        --emerald: #1d8a66;
+        --pine: #0f4333;
+        --frost: rgba(255, 255, 255, 0.9);
+        --frost-muted: rgba(255, 255, 255, 0.6);
+        --panel: rgba(9, 39, 55, 0.4);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--frost);
+        background: linear-gradient(135deg, var(--sky) 0%, var(--deep-sky) 45%, #0c2d46 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        scroll-behavior: smooth;
+      }
+
+      main {
+        width: min(960px, 92vw);
+        padding: 96px 0 120px;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 48px;
+      }
+
+      header h1 {
+        font-size: clamp(2.8rem, 6vw, 3.6rem);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        margin: 0 0 16px 0;
+      }
+
+      header .subtitle {
+        font-size: clamp(1.2rem, 3vw, 1.4rem);
+        color: var(--frost-muted);
+        font-style: italic;
+        margin: 0 0 32px 0;
+        line-height: 1.6;
+      }
+
+      .back-link {
+        display: inline-block;
+        color: var(--frost);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+        margin-bottom: 40px;
+      }
+
+      .back-link:hover,
+      .back-link:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-2px);
+      }
+
+      section {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        padding: clamp(32px, 6vw, 48px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+        margin-bottom: 36px;
+      }
+
+      section:last-of-type {
+        margin-bottom: 0;
+      }
+
+      h2 {
+        font-size: clamp(2rem, 4.5vw, 2.4rem);
+        margin: 0 0 20px 0;
+        letter-spacing: 0.03em;
+        color: var(--frost);
+      }
+
+      h3 {
+        font-size: clamp(1.4rem, 3vw, 1.7rem);
+        margin: 32px 0 16px 0;
+        letter-spacing: 0.02em;
+        color: var(--frost);
+      }
+
+      h3:first-of-type {
+        margin-top: 0;
+      }
+
+      p {
+        margin: 0 0 20px 0;
+        line-height: 1.8;
+        color: var(--frost-muted);
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+      }
+
+      p:last-child {
+        margin-bottom: 0;
+      }
+
+      .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 24px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .step-list li {
+        padding-left: 0;
+      }
+
+      .step-list li strong {
+        display: block;
+        font-size: clamp(1.2rem, 3vw, 1.4rem);
+        color: var(--frost);
+        margin-bottom: 12px;
+        letter-spacing: 0.02em;
+      }
+
+      .template {
+        background: rgba(0, 0, 0, 0.2);
+        border-left: 4px solid var(--emerald);
+        padding: 24px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+
+      .template h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+      }
+
+      .template .subject {
+        font-weight: 600;
+        color: var(--frost);
+        margin-bottom: 8px;
+      }
+
+      .template .body {
+        white-space: pre-line;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: var(--frost-muted);
+      }
+
+      .bonus-tips {
+        list-style: none;
+        padding: 0;
+        margin: 24px 0;
+      }
+
+      .bonus-tips li {
+        padding-left: 24px;
+        margin-bottom: 16px;
+        line-height: 1.7;
+        color: var(--frost-muted);
+        position: relative;
+      }
+
+      .bonus-tips li:before {
+        content: "💡";
+        position: absolute;
+        left: 0;
+      }
+
+      .bonus-tips li:last-child {
+        margin-bottom: 0;
+      }
+
+      .warning {
+        background: rgba(255, 200, 87, 0.15);
+        border: 2px solid rgba(255, 200, 87, 0.4);
+        border-left: 4px solid rgba(255, 200, 87, 0.8);
+        padding: 24px;
+        border-radius: 12px;
+        margin: 24px 0;
+      }
+
+      .warning h3 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        color: rgba(255, 220, 150, 1);
+      }
+
+      .warning p {
+        color: rgba(255, 240, 200, 0.9);
+        margin-bottom: 12px;
+      }
+
+      .warning .response {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 16px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-style: italic;
+        color: rgba(255, 240, 200, 0.95);
+      }
+
+      @media (max-width: 720px) {
+        .template .body {
+          font-size: 0.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a href="/" class="back-link">← Back to Home</a>
+        <h1>How to Grovel (The Right Way)</h1>
+        <p class="subtitle">A guide to cultivating great relationships with your teachers — no actual groveling required.</p>
+      </header>
+
+      <section>
+        <h2>Why It Matters</h2>
+        <p>
+          A strong relationship with your teachers makes your school life easier and more meaningful. It builds mutual respect, helps you learn better, and might even make those recommendation letters write themselves. The goal isn't flattery — it's connection.
+        </p>
+      </section>
+
+      <section>
+        <h2>The Steps</h2>
+        <ol class="step-list">
+          <li>
+            <strong>Step 1: Show Up</strong>
+            <p>
+              Spend time in your teacher's orbit. Drop by their office hours — even when you don't need help. Ask questions about class topics, or just check in about how the week's going. Being a familiar, friendly face makes a huge difference.
+            </p>
+          </li>
+          <li>
+            <strong>Step 2: Find Common Ground</strong>
+            <p>
+              Teachers are people too! Ask about what they're reading, watching, or researching. Maybe you share an interest in a podcast, a favorite author, or a sports team. Genuine conversation (not "grade fishing") goes a long way.
+            </p>
+          </li>
+          <li>
+            <strong>Step 3: Communicate Early and Honestly</strong>
+            <p>
+              If you're struggling, running late, or need an extension, reach out before it becomes a crisis. Clear, respectful communication builds trust — and prevents last-minute panicked emails.
+            </p>
+          </li>
+          <li>
+            <strong>Step 4: Express Gratitude</strong>
+            <p>
+              A simple "thank you" goes a long way. Whether it's for extra feedback, a recommendation letter, or just a good lecture — let them know you appreciate their time and effort.
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section>
+        <div class="template">
+          <h3>The Grovel Template (for Emails That Actually Work)</h3>
+          <div class="subject">Subject: Quick Follow-Up / Request for [Help / Feedback / Extension]</div>
+          <div class="body">Body:
+
+Good morning/afternoon/evening [Teacher's Name],
+
+I hope you're doing well. I wanted to reach out about [specific class, assignment, or concern]. [Briefly explain your situation — keep it honest, concise, and polite.]
+
+I understand [acknowledge their perspective, e.g., "this is short notice" or "it's a busy time"], but I'd really appreciate any advice or flexibility you can offer.
+
+Thank you so much for your time and for [something positive about their class or support].
+
+Best,
+[Your Name]
+[Your Class/Section, if relevant]</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="warning">
+          <h3>⚠️ Important: If They Push Back</h3>
+          <p>
+            Sometimes a teacher might follow up and say something like: "If I make this exception for you, I'd have to make it for everyone."
+          </p>
+          <p>
+            If this happens, respond with understanding and respect for their position:
+          </p>
+          <div class="response">
+            "I totally understand — that's completely fair. If anyone else were in my position, I think they'd appreciate the same understanding."
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Bonus Tips</h2>
+        <ul class="bonus-tips">
+          <li>Don't write emails in a rush — reread before sending.</li>
+          <li>Avoid dramatic apologies ("I'm the worst student ever!") — stay sincere.</li>
+          <li>When things go wrong, own it. Responsibility > excuses.</li>
+          <li>Follow up in person when possible — it shows accountability.</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
+
