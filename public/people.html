@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>People • Ellika LeSage</title>
+    <style media="screen">
+      :root {
+        --sky: #8faec0;
+        --deep-sky: #698da5;
+        --emerald: #1d8a66;
+        --pine: #0f4333;
+        --frost: rgba(255, 255, 255, 0.9);
+        --frost-muted: rgba(255, 255, 255, 0.6);
+        --panel: rgba(9, 39, 55, 0.4);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--frost);
+        background: linear-gradient(135deg, var(--sky) 0%, var(--deep-sky) 45%, #0c2d46 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        scroll-behavior: smooth;
+      }
+
+      main {
+        width: min(960px, 92vw);
+        padding: 96px 0 120px;
+      }
+
+      header.hero {
+        text-align: center;
+        margin-bottom: 72px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+
+      header.hero h1 {
+        font-size: clamp(3.4rem, 8vw, 4.6rem);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin: 0;
+      }
+
+      nav {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 36px;
+      }
+
+      nav a {
+        color: var(--frost);
+        text-decoration: none;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+      }
+
+      nav a:hover,
+      nav a:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-2px);
+      }
+
+      section {
+        background: var(--panel);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        padding: clamp(32px, 6vw, 48px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+        margin-bottom: 36px;
+      }
+
+      h2 {
+        font-size: clamp(2rem, 4.5vw, 2.4rem);
+        margin: 0 0 24px 0;
+        letter-spacing: 0.03em;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: var(--frost-muted);
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+      }
+
+      .error {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        padding: 20px;
+        border-radius: 16px;
+        color: var(--frost);
+        margin-bottom: 24px;
+      }
+
+      .people-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 24px;
+      }
+
+      .person-card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        padding: 24px;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+      }
+
+      .person-card:hover {
+        transform: translateY(-4px);
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .person-card h3 {
+        margin: 0 0 12px 0;
+        font-size: clamp(1.3rem, 3vw, 1.5rem);
+        color: var(--frost);
+        letter-spacing: 0.02em;
+      }
+
+      .person-field {
+        margin-bottom: 10px;
+        line-height: 1.6;
+      }
+
+      .person-field strong {
+        color: var(--frost);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.8;
+      }
+
+      .person-field span {
+        color: var(--frost-muted);
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+        display: block;
+      }
+
+      .person-field:last-child {
+        margin-bottom: 0;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--frost-muted);
+      }
+
+      .empty-state p {
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+        margin: 0;
+      }
+
+      .add-form {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        padding: 24px;
+        margin-top: 24px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-group label {
+        color: var(--frost);
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        opacity: 0.9;
+      }
+
+      .form-group input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: var(--frost);
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+        font-family: inherit;
+        transition: border-color 180ms ease, background 180ms ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .form-group input::placeholder {
+        color: var(--frost-muted);
+        opacity: 0.6;
+      }
+
+      .form-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        cursor: pointer;
+        accent-color: var(--emerald);
+      }
+
+      .form-group label:has(input[type="checkbox"]) {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .add-button {
+        background: var(--emerald);
+        color: var(--frost);
+        border: none;
+        border-radius: 16px;
+        padding: 14px 28px;
+        font-size: clamp(1rem, 2.6vw, 1.12rem);
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+        box-shadow: 0 4px 12px rgba(29, 138, 102, 0.3);
+      }
+
+      .add-button:hover,
+      .add-button:focus {
+        transform: translateY(-2px);
+        background: #1a7a5a;
+        box-shadow: 0 6px 16px rgba(29, 138, 102, 0.4);
+      }
+
+      .add-button:active {
+        transform: translateY(0);
+      }
+
+      .add-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .success-message {
+        background: rgba(29, 138, 102, 0.2);
+        border: 1px solid rgba(29, 138, 102, 0.4);
+        padding: 16px;
+        border-radius: 12px;
+        color: var(--frost);
+        margin-top: 16px;
+        display: none;
+      }
+
+      .success-message.show {
+        display: block;
+      }
+
+      @media (max-width: 720px) {
+        nav {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .people-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <h1>People</h1>
+        <p>Database collection from Firestore</p>
+        <nav aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="index.html#about">About Me</a>
+          <a href="index.html#contact">Get In Contact</a>
+          <a href="index.html#resume">Resume</a>
+        </nav>
+      </header>
+
+      <section>
+        <h2>People Collection</h2>
+        <div id="loading" class="loading">Loading people from database...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="people-container" class="people-grid" style="display: none;"></div>
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <p>No people found in the database.</p>
+        </div>
+
+        <div class="add-form">
+          <h3 style="margin: 0 0 20px 0; font-size: clamp(1.4rem, 3vw, 1.8rem);">Add New Person</h3>
+          <form id="add-person-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Enter name" required>
+              </div>
+              <div class="form-group">
+                <label for="haircolor">Hair Color</label>
+                <input type="text" id="haircolor" name="haircolor" placeholder="Enter hair color" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="favoriteclass">Favorite Class</label>
+                <input type="text" id="favoriteclass" name="favoriteclass" placeholder="Enter favorite class" required>
+              </div>
+              <div class="form-group">
+                <label for="computercolor">Computer Color</label>
+                <input type="text" id="computercolor" name="computercolor" placeholder="Enter computer color" required>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+              <label style="display: flex; align-items: center; cursor: pointer;">
+                <input type="checkbox" id="isabove67" name="isabove67" style="width: auto; margin-right: 10px; cursor: pointer;">
+                <span>Is Above 67</span>
+              </label>
+            </div>
+            <button type="submit" class="add-button" id="add-button">Add Person</button>
+            <div id="success-message" class="success-message"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Try Firebase Hosting auto-config first, fallback to CDN -->
+    <script>
+      // Try to load Firebase Hosting auto-config
+      (function() {
+        var script = document.createElement('script');
+        script.src = '/__/firebase/init.js?useEmulator=false';
+        script.onerror = function() {
+          // If Firebase Hosting init fails, load from CDN
+          loadFirebaseFromCDN();
+        };
+        script.onload = function() {
+          // Firebase Hosting init loaded, now load SDK
+          loadFirebaseSDK();
+        };
+        document.head.appendChild(script);
+      })();
+
+      function loadFirebaseFromCDN() {
+        // Load Firebase SDK from CDN
+        var appScript = document.createElement('script');
+        appScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js';
+        appScript.onload = function() {
+          var firestoreScript = document.createElement('script');
+          firestoreScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js';
+          firestoreScript.onload = function() {
+            initApp();
+          };
+          document.head.appendChild(firestoreScript);
+        };
+        document.head.appendChild(appScript);
+      }
+
+      function loadFirebaseSDK() {
+        // Load Firebase SDK from Firebase Hosting
+        var appScript = document.createElement('script');
+        appScript.src = '/__/firebase/12.4.0/firebase-app-compat.js';
+        appScript.onerror = function() {
+          // Fallback to CDN if Hosting SDK fails
+          loadFirebaseFromCDN();
+        };
+        appScript.onload = function() {
+          var firestoreScript = document.createElement('script');
+          firestoreScript.src = '/__/firebase/12.4.0/firebase-firestore-compat.js';
+          firestoreScript.onerror = function() {
+            loadFirebaseFromCDN();
+          };
+          firestoreScript.onload = function() {
+            initApp();
+          };
+          document.head.appendChild(firestoreScript);
+        };
+        document.head.appendChild(appScript);
+      }
+
+      function initApp() {
+        // Function to display people
+        function displayPeople(people) {
+          const container = document.getElementById('people-container');
+          const loading = document.getElementById('loading');
+          const emptyState = document.getElementById('empty-state');
+          
+          loading.style.display = 'none';
+
+          if (people.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+          }
+
+          container.innerHTML = '';
+          container.style.display = 'grid';
+
+          people.forEach((person) => {
+            const card = document.createElement('div');
+            card.className = 'person-card';
+            
+            // Display document ID as the name/heading
+            let cardContent = `<h3>${person.id}</h3>`;
+            
+            // Display all fields from the document
+            Object.keys(person.data).forEach((key) => {
+              const value = person.data[key];
+              // Skip the document ID field (already displayed as heading)
+              if (key !== 'id') {
+                cardContent += `
+                  <div class="person-field">
+                    <strong>${key}</strong>
+                    <span>${formatValue(value)}</span>
+                  </div>
+                `;
+              }
+            });
+
+            // If no fields were added (besides the heading), show a default message
+            if (cardContent === `<h3>${person.id}</h3>`) {
+              cardContent += '<div class="person-field"><span>No data available</span></div>';
+            }
+
+            card.innerHTML = cardContent;
+            container.appendChild(card);
+          });
+        }
+
+        // Function to format values (handles objects, arrays, etc.)
+        function formatValue(value) {
+          if (value === null || value === undefined) {
+            return 'N/A';
+          }
+          if (typeof value === 'boolean') {
+            return value ? 'Yes' : 'No';
+          }
+          if (typeof value === 'object') {
+            if (value instanceof Date) {
+              return value.toLocaleDateString();
+            }
+            if (Array.isArray(value)) {
+              return value.join(', ');
+            }
+            return JSON.stringify(value);
+          }
+          return String(value);
+        }
+
+        // Function to handle errors
+        function displayError(error) {
+          const loading = document.getElementById('loading');
+          const errorDiv = document.getElementById('error');
+          
+          loading.style.display = 'none';
+          errorDiv.style.display = 'block';
+          errorDiv.textContent = `Error loading people: ${error.message}`;
+          console.error('Error:', error);
+        }
+
+        // Initialize Firebase and fetch data
+        function initFirebase() {
+          // Check if Firebase is already initialized (from Firebase Hosting auto-config)
+          if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+            return firebase.firestore();
+          }
+          
+          // Manual Firebase configuration
+          const firebaseConfig = {
+            apiKey: "AIzaSyDQk9685j4VFs0HtySiFmeM8pO8hVjAaOA",
+            authDomain: "personalwebsite-ellika.firebaseapp.com",
+            projectId: "personalwebsite-ellika",
+            storageBucket: "personalwebsite-ellika.appspot.com",
+            messagingSenderId: "963242294419",
+            appId: "1:963242294419:web:default"
+          };
+          
+          // Initialize Firebase
+          firebase.initializeApp(firebaseConfig);
+          return firebase.firestore();
+        }
+
+        // Function to refresh the people list
+        function refreshPeopleList() {
+          const db = initFirebase();
+          db.collection('People')
+            .get()
+            .then((querySnapshot) => {
+              const people = [];
+              querySnapshot.forEach((doc) => {
+                people.push({
+                  id: doc.id,
+                  data: doc.data()
+                });
+              });
+              displayPeople(people);
+            })
+            .catch((error) => {
+              displayError(error);
+            });
+        }
+
+        // Function to add a new person to Firestore
+        function addPerson(personData) {
+          const db = initFirebase();
+          return db.collection('People').add(personData);
+        }
+
+        // Set up form submission handler
+        function setupForm() {
+          const form = document.getElementById('add-person-form');
+          const addButton = document.getElementById('add-button');
+          const successMessage = document.getElementById('success-message');
+
+          if (form) {
+            form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              
+              // Get form values
+              const name = document.getElementById('name').value.trim();
+              const haircolor = document.getElementById('haircolor').value.trim();
+              const favoriteclass = document.getElementById('favoriteclass').value.trim();
+              const computercolor = document.getElementById('computercolor').value.trim();
+              const isabove67 = document.getElementById('isabove67').checked;
+
+              // Validate inputs
+              if (!name || !haircolor || !favoriteclass || !computercolor) {
+                displayError(new Error('Please fill in all required fields.'));
+                return;
+              }
+
+              // Disable button while submitting
+              addButton.disabled = true;
+              addButton.textContent = 'Adding...';
+
+              // Prepare data object
+              const personData = {
+                name: name,
+                haircolor: haircolor,
+                isabove67: isabove67,
+                favoriteclass: favoriteclass,
+                computercolor: computercolor
+              };
+
+              // Add to Firestore
+              addPerson(personData)
+                .then(() => {
+                  // Success!
+                  successMessage.textContent = 'Person added successfully!';
+                  successMessage.classList.add('show');
+                  
+                  // Reset form
+                  form.reset();
+                  
+                  // Refresh the list
+                  refreshPeopleList();
+                  
+                  // Hide success message after 3 seconds
+                  setTimeout(() => {
+                    successMessage.classList.remove('show');
+                  }, 3000);
+                })
+                .catch((error) => {
+                  displayError(error);
+                })
+                .finally(() => {
+                  // Re-enable button
+                  addButton.disabled = false;
+                  addButton.textContent = 'Add Person';
+                });
+            });
+          }
+        }
+
+        // Wait for page to load and Firebase SDK to be available
+        function tryInit() {
+          if (typeof firebase === 'undefined') {
+            setTimeout(tryInit, 50);
+            return;
+          }
+          
+          try {
+            const db = initFirebase();
+            
+            // Fetch people from Firestore
+            db.collection('People')
+              .get()
+              .then((querySnapshot) => {
+                const people = [];
+                querySnapshot.forEach((doc) => {
+                  people.push({
+                    id: doc.id,
+                    data: doc.data()
+                  });
+                });
+                displayPeople(people);
+              })
+              .catch((error) => {
+                displayError(error);
+              });
+
+            // Set up the form
+            setupForm();
+          } catch (error) {
+            displayError(error);
+          }
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', tryInit);
+        } else {
+          tryInit();
+        }
+      }
+    </script>
+  </body>
+</html>
+
