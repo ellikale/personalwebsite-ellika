@@ -164,6 +164,26 @@
         margin-bottom: 0;
       }
 
+      .delete-button {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.4);
+        color: var(--frost);
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: background 180ms ease, border-color 180ms ease;
+        width: 100%;
+      }
+
+      .delete-button:hover,
+      .delete-button:focus {
+        background: rgba(220, 53, 69, 0.3);
+        border-color: rgba(220, 53, 69, 0.6);
+      }
+
       .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -456,8 +476,28 @@
               cardContent += '<div class="person-field"><span>No data available</span></div>';
             }
 
+            // Add delete button
+            cardContent += `<button class="delete-button" data-id="${person.id}">Delete</button>`;
+
             card.innerHTML = cardContent;
             container.appendChild(card);
+
+            // Add delete event listener
+            const deleteBtn = card.querySelector('.delete-button');
+            if (deleteBtn) {
+              deleteBtn.addEventListener('click', function() {
+                if (confirm(`Are you sure you want to delete "${person.id}"?`)) {
+                  deletePerson(person.id)
+                    .then(() => {
+                      // Refresh the list after deletion
+                      refreshPeopleList();
+                    })
+                    .catch((error) => {
+                      displayError(error);
+                    });
+                }
+              });
+            }
           });
         }
 
@@ -535,9 +575,16 @@
         }
 
         // Function to add a new person to Firestore
-        function addPerson(personData) {
+        // Uses the person's name as the document ID
+        function addPerson(name, personData) {
           const db = initFirebase();
-          return db.collection('People').add(personData);
+          return db.collection('People').doc(name).set(personData);
+        }
+
+        // Function to delete a person from Firestore
+        function deletePerson(documentId) {
+          const db = initFirebase();
+          return db.collection('People').doc(documentId).delete();
         }
 
         // Set up form submission handler
@@ -567,17 +614,16 @@
               addButton.disabled = true;
               addButton.textContent = 'Adding...';
 
-              // Prepare data object
+              // Prepare data object (without name, since it's used as document ID)
               const personData = {
-                name: name,
                 haircolor: haircolor,
                 isabove67: isabove67,
                 favoriteclass: favoriteclass,
                 computercolor: computercolor
               };
 
-              // Add to Firestore
-              addPerson(personData)
+              // Add to Firestore using name as document ID
+              addPerson(name, personData)
                 .then(() => {
                   // Success!
                   successMessage.textContent = 'Person added successfully!';
@@ -635,9 +681,33 @@
 
             // Set up the form
             setupForm();
+
+            // Delete specific documents if they exist
+            deleteSpecificDocuments();
           } catch (error) {
             displayError(error);
           }
+        }
+
+        // Function to delete specific documents
+        function deleteSpecificDocuments() {
+          const documentsToDelete = ['z0bC5DbC4rL8hvrpCBdB', 'sdjfk'];
+          const db = initFirebase();
+          
+          documentsToDelete.forEach(docId => {
+            db.collection('People').doc(docId).delete()
+              .then(() => {
+                console.log(`Deleted document: ${docId}`);
+                // Refresh the list after deletion
+                setTimeout(() => {
+                  refreshPeopleList();
+                }, 500);
+              })
+              .catch((error) => {
+                // Document might not exist, which is fine
+                console.log(`Document ${docId} not found or already deleted`);
+              });
+          });
         }
 
         // Start initialization when DOM is ready
