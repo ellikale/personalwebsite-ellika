@@ -173,15 +173,53 @@
         font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
-        margin-top: 12px;
         transition: background 180ms ease, border-color 180ms ease;
-        width: 100%;
+        flex: 1;
       }
 
       .delete-button:hover,
       .delete-button:focus {
         background: rgba(220, 53, 69, 0.3);
         border-color: rgba(220, 53, 69, 0.6);
+      }
+
+      .favorite-button {
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid rgba(255, 193, 7, 0.4);
+        color: var(--frost);
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 180ms ease, border-color 180ms ease;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .favorite-button:hover,
+      .favorite-button:focus {
+        background: rgba(255, 193, 7, 0.3);
+        border-color: rgba(255, 193, 7, 0.6);
+      }
+
+      .favorite-button.active {
+        background: rgba(255, 193, 7, 0.4);
+        border-color: rgba(255, 193, 7, 0.8);
+        color: #ffc107;
+      }
+
+      .favorite-button .star {
+        font-size: 1rem;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
       }
 
       .empty-state {
@@ -476,17 +514,42 @@
               cardContent += '<div class="person-field"><span>No data available</span></div>';
             }
 
-            // Add delete button
-            cardContent += `<button class="delete-button" data-id="${person.id}">Delete</button>`;
+            // Check if this person is favorited
+            const isFavorited = isFavorite(person.id);
+            const favoriteClass = isFavorited ? 'active' : '';
+            const favoriteText = isFavorited ? 'Favorited' : 'Favorite';
+            const favoriteStar = isFavorited ? '★' : '☆';
+
+            // Add buttons
+            cardContent += `
+              <div class="button-group">
+                <button class="favorite-button ${favoriteClass}" data-id="${person.id}">
+                  <span class="star">${favoriteStar}</span>
+                  <span>${favoriteText}</span>
+                </button>
+                <button class="delete-button" data-id="${person.id}">Delete</button>
+              </div>
+            `;
 
             card.innerHTML = cardContent;
             container.appendChild(card);
+
+            // Add favorite event listener
+            const favoriteBtn = card.querySelector('.favorite-button');
+            if (favoriteBtn) {
+              favoriteBtn.addEventListener('click', function() {
+                toggleFavorite(person.id);
+                // updateAllFavoriteButtons() is called inside toggleFavorite()
+              });
+            }
 
             // Add delete event listener
             const deleteBtn = card.querySelector('.delete-button');
             if (deleteBtn) {
               deleteBtn.addEventListener('click', function() {
                 if (confirm(`Are you sure you want to delete "${person.id}"?`)) {
+                  // Remove from favorites if it was favorited
+                  removeFavorite(person.id);
                   deletePerson(person.id)
                     .then(() => {
                       // Refresh the list after deletion
@@ -585,6 +648,113 @@
         function deletePerson(documentId) {
           const db = initFirebase();
           return db.collection('People').doc(documentId).delete();
+        }
+
+        // ============================================
+        // Cookie Management Functions for Favorites
+        // ============================================
+
+        // Cookie utility functions
+        const CookieManager = {
+          // Set a cookie
+          set(name, value, days = 365) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/`;
+          },
+
+          // Get a cookie value
+          get(name) {
+            const nameEQ = name + "=";
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+              let cookie = cookies[i];
+              while (cookie.charAt(0) === ' ') {
+                cookie = cookie.substring(1, cookie.length);
+              }
+              if (cookie.indexOf(nameEQ) === 0) {
+                return decodeURIComponent(cookie.substring(nameEQ.length, cookie.length));
+              }
+            }
+            return null;
+          },
+
+          // Remove a cookie
+          remove(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+          }
+        };
+
+        // Favorites management functions
+        // Only one favorite allowed at a time
+        const FAVORITES_COOKIE_NAME = 'people_favorite';
+
+        // Get the current favorite from cookie
+        function getFavorite() {
+          return CookieManager.get(FAVORITES_COOKIE_NAME);
+        }
+
+        // Save favorite to cookie (replaces any existing favorite)
+        function saveFavorite(personId) {
+          CookieManager.set(FAVORITES_COOKIE_NAME, personId, 365);
+        }
+
+        // Clear favorite from cookie
+        function clearFavorite() {
+          CookieManager.remove(FAVORITES_COOKIE_NAME);
+        }
+
+        // Check if a person is favorited
+        function isFavorite(personId) {
+          const favoriteId = getFavorite();
+          return favoriteId === personId;
+        }
+
+        // Toggle favorite status (only one favorite allowed)
+        function toggleFavorite(personId) {
+          const currentFavorite = getFavorite();
+          
+          if (currentFavorite === personId) {
+            // Unfavorite if clicking the same person
+            clearFavorite();
+            // Update all buttons to reflect no favorite
+            updateAllFavoriteButtons();
+          } else {
+            // Set new favorite (replaces previous one)
+            saveFavorite(personId);
+            // Update all buttons to reflect the new favorite
+            updateAllFavoriteButtons();
+          }
+        }
+
+        // Update all favorite buttons to reflect current favorite state
+        function updateAllFavoriteButtons() {
+          const currentFavorite = getFavorite();
+          const allFavoriteButtons = document.querySelectorAll('.favorite-button');
+          
+          allFavoriteButtons.forEach(btn => {
+            const personId = btn.getAttribute('data-id');
+            const isFavorited = personId === currentFavorite;
+            
+            btn.classList.toggle('active', isFavorited);
+            const star = btn.querySelector('.star');
+            const text = btn.querySelector('span:last-child');
+            
+            if (star) {
+              star.textContent = isFavorited ? '★' : '☆';
+            }
+            if (text) {
+              text.textContent = isFavorited ? 'Favorited' : 'Favorite';
+            }
+          });
+        }
+
+        // Remove a favorite (used when deleting a person)
+        function removeFavorite(personId) {
+          const currentFavorite = getFavorite();
+          if (currentFavorite === personId) {
+            clearFavorite();
+          }
         }
 
         // Set up form submission handler
