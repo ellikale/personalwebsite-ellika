@@ -369,6 +369,7 @@
           <a href="index.html#about">About Me</a>
           <a href="index.html#contact">Get In Contact</a>
           <a href="index.html#resume">Resume</a>
+          <a href="fg2048.html">FG 2048</a>
         </nav>
       </header>
 
@@ -547,6 +548,19 @@
             const deleteBtn = card.querySelector('.delete-button');
             if (deleteBtn) {
               deleteBtn.addEventListener('click', function() {
+                // Prompt for password first
+                const password = prompt('Enter password to delete this person:');
+                
+                // Check if password matches
+                if (password !== 'hitthegriddy') {
+                  // Password incorrect - cancel deletion
+                  if (password !== null) { // Only show alert if user didn't cancel
+                    alert('Incorrect password. Deletion cancelled.');
+                  }
+                  return; // Exit function, don't proceed with deletion
+                }
+                
+                // Password correct - proceed with confirmation and deletion
                 if (confirm(`Are you sure you want to delete "${person.id}"?`)) {
                   // Remove from favorites if it was favorited
                   removeFavorite(person.id);
